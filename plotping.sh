@@ -57,16 +57,21 @@ case $command in
             echo 'Terminated'
         fi
         ;;
+    'clean')
+        if [ -f "$file_tmp_ping_data" ]; then
+            echo -n > "$file_tmp_ping_data"
+        fi
+        echo 'Done'
+        ;;
     'show')
         if [ -f "$file_tmp_ping_data" ]; then
+            echo
+            echo "THRESHOLDS"
+            echo "[0-25: 13%]    [25-100: 25%]    [100-300: 10%]    [300-500: 2%]    [500-1000+: 1%]"
             cat "$file_tmp_ping_data" 2>/dev/null | awk -F [=\ ] {'print $(NF-1)'} | grep -E "[0-9]" > "$file_tmp_plot_data"
             gnuplot -e "set term dumb; set ylabel 'ms'; set xlabel 'Number of pings'; plot '$file_tmp_plot_data' notitle"
-            echo 'Statistics'
-            echo '0-25      :   13%'
-            echo '25-150    :   25%'
-            echo '150-300   :   10%'
-            echo '300-500   :   2%'
-            echo '500-1000+ :   1%'
+            echo "LATEST 10 PINGS"
+            tail -n 10 "$file_tmp_ping_data"
             exit
         else
             echo 'Tracking process is not started (command: plotping start)'
